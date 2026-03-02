@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: task-management-monolith
+    runtime: docker
+    plan: free
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///./sql_app.db
+      - key: API_V1_STR
+        value: /api/v1
+      - key: PROJECT_NAME
+        value: TaskFlow API

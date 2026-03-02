@@ -1,5 +1,8 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.database import engine, Base
@@ -25,6 +28,17 @@ app.add_middleware(
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-@app.get("/")
-def root():
-    return {"message": "Welcome to the Scalable API", "docs": "/docs"}
+# Serve static files from the frontend/dist directory
+frontend_path = os.path.join(os.getcwd(), "frontend", "dist")
+
+if os.path.exists(frontend_path):
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
+
+    @app.exception_handler(404)
+    async def not_found_exception_handler(request, exc):
+        # Fallback to index.html for React Router
+        return FileResponse(os.path.join(frontend_path, "index.html"))
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
